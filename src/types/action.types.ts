@@ -21,4 +21,5 @@ export interface CreateActionPayload {
   description: string;
   icon?: string;
   color?: string;
+  status?: number; 
 }

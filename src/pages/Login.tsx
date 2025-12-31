@@ -16,7 +16,7 @@ export const Login: React.FC = () => {
       className="min-h-screen flex items-center justify-center p-4"
       style={{
         backgroundImage: `url(${loginBackground})`,
-        backgroundSize: '100% 110%',     // ✅ Estira verticalmente para mostrar más contenido
+        backgroundSize: '100% 110%',     
         backgroundPosition: 'center center',
         backgroundRepeat: 'no-repeat'
       }}

@@ -25,13 +25,10 @@ export const useActions = () => {
   const isLoadingRef = useRef(false);
 
   const loadActions = async (pageNumber: number, pageSize: number) => {
-    // Evitar llamadas duplicadas
     if (isLoadingRef.current) {
-      console.log('⚠️ Ya hay una carga en progreso, ignorando');
       return;
     }
     
-    // Validar y forzar valores seguros
     pageNumber = Math.max(0, Math.floor(pageNumber));
     pageSize = Math.max(1, Math.min(100, Math.floor(pageSize)));
     
@@ -40,7 +37,7 @@ export const useActions = () => {
     setError(null);
     
     try {
-      console.log(`📄 Cargando página ${pageNumber}`);
+      console.log(`📄 Cargando página ${pageNumber} con ${pageSize} items`);
       
       const response: ActionsListResponse = await actionsService.getActions(
         pageNumber,
@@ -77,27 +74,50 @@ export const useActions = () => {
       loadActions(0, PAGINATION.DEFAULT_PAGE_SIZE);
       hasLoadedInitialData.current = true;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const goToPage = (pageNumber: number) => {
-    console.log(`🔄 Cambiando a página ${pageNumber}`);
     
-    // Validar rango
     if (pageNumber < 0 || pageNumber >= pagination.totalPages) {
-      console.log('⚠️ Página fuera de rango');
       return;
     }
     
     loadActions(pageNumber, pagination.pageSize);
   };
 
-  const createAction = async (payload: CreateActionPayload): Promise<void> => {
+  const changePageSize = (newPageSize: number) => {
+    
+    if (newPageSize < 1 || newPageSize > 100) {
+      return;
+    }
+    
+    loadActions(0, newPageSize);
+  };
+
+  const createAction = async (payload: CreateActionPayload, file?: File): Promise<void> => {
     try {
-      await actionsService.createAction(payload);
+      await actionsService.createAction(payload, file);
       await loadActions(0, pagination.pageSize);
     } catch (err: any) {
       throw new Error(err.message);
+    }
+  };
+
+  const deleteAction = async (id: string): Promise<void> => {
+    try {
+      console.log(`🗑️ Eliminando acción ID: ${id}`);
+   
+      setActions(prevActions => prevActions.filter(action => action.id !== id));
+      
+      setPagination(prev => ({
+        ...prev,
+        totalRecords: prev.totalRecords - 1,
+      }));
+      
+      console.log('✅ Acción eliminada (solo frontend)');
+    } catch (err: any) {
+      console.log('❌ Error al eliminar acción:', err.message);
+      throw new Error(err.message || 'Error al eliminar la acción');
     }
   };
 
@@ -107,6 +127,8 @@ export const useActions = () => {
     isLoading,
     error,
     goToPage,
+    changePageSize,
     createAction,
+    deleteAction,
   };
 };

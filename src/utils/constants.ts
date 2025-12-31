@@ -1,13 +1,10 @@
-// src/utils/constants.ts
 import { API_CONFIG } from '../config/api.config';
 
-// ✅ URLs construidas desde variables de entorno
 export const API_URLS = {
   AUTH_BASE: API_CONFIG.AUTH_BASE_URL,
   ACTIONS_BASE: API_CONFIG.ACTIONS_BASE_URL,
 } as const;
 
-// ✅ ENDPOINTS - Estas rutas relativas SÍ van aquí
 export const ENDPOINTS = {
   LOGIN: '/api/Authentication/Login',
   ACTIONS_LIST: '/api/v1/actions/admin-list',

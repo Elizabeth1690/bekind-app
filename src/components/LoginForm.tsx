@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { useAuthStore } from '../store/authStore';
 import type { LoginCredentials } from '../types/auth.types';
 import logo from '../assets/images/logo-bekind.svg';
-// ✅ Importar iconos
 import emailIcon from '../assets/icons/mail.svg';
 import lockIcon from '../assets/icons/leading-icon.svg';
 import eyeIcon from '../assets/icons/trailing-icon.svg';
@@ -17,16 +16,13 @@ export const LoginForm: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, touchedFields },
     watch,
   } = useForm<LoginCredentials>({
-    defaultValues: {
-      username: '',
-      password: '',
-    },
+    mode: 'onBlur',
+    reValidateMode: 'onChange',  
   });
 
-  // ✅ Observar los valores para habilitar el botón
   const username = watch('username');
   const password = watch('password');
   const isFormValid = username && password && password.length >= 6;
@@ -38,7 +34,6 @@ export const LoginForm: React.FC = () => {
       await login(data);
       navigate('/dashboard');
     } catch (error) {
-      // Error manejado por el store
     }
   };
 
@@ -46,7 +41,6 @@ export const LoginForm: React.FC = () => {
     <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto">
       {/* Logo y texto centrados */}
       <div className="text-center mb-6">
-        {/* Logo con tamaño ajustado */}
         <div className="flex justify-center mb-6">
           <img 
             src={logo} 
@@ -55,7 +49,6 @@ export const LoginForm: React.FC = () => {
           />
         </div>
         
-        {/* Texto con semi-negrita - Roboto */}
         <p className="font-roboto text-center text-black font-normal leading-tight text-xl">
           <span>¡Empieza a conectar tu comunidad ante</span>
           <br />
@@ -86,7 +79,9 @@ export const LoginForm: React.FC = () => {
               id="email"
               type="email"
               placeholder="Ingresar correo"
-              className="w-full pl-10 pr-4 py-3.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-lato"
+              className={`w-full pl-10 pr-4 py-3.5 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-lato ${
+                errors.username ? 'border-red-500' : 'border-gray-300'
+              }`}
               style={{ height: '36px' }}
               {...register('username', {
                 required: 'El correo electrónico es requerido',
@@ -97,8 +92,11 @@ export const LoginForm: React.FC = () => {
               })}
             />
           </div>
+          {/* ✅ Mostrar error si existe */}
           {errors.username && (
-            <p className="mt-1 text-sm text-red-600 font-lato">{errors.username.message}</p>
+            <p className="mt-1 text-sm text-red-600 font-lato">
+              {errors.username.message}
+            </p>
           )}
         </div>
 
@@ -123,7 +121,9 @@ export const LoginForm: React.FC = () => {
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Ingresa tu contraseña"
-              className="w-full pl-10 pr-12 py-3.5 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-lato"
+              className={`w-full pl-10 pr-12 py-3.5 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-lato ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              }`}
               style={{ height: '36px' }}
               {...register('password', {
                 required: 'La contraseña es requerida',
@@ -145,12 +145,15 @@ export const LoginForm: React.FC = () => {
               />
             </button>
           </div>
+          {/* ✅ Mostrar error si existe */}
           {errors.password && (
-            <p className="mt-1 text-sm text-red-600 font-lato">{errors.password.message}</p>
+            <p className="mt-1 text-sm text-red-600 font-lato">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
-        {/* Link recuperar contraseña - Lato */}
+        {/* Link recuperar contraseña */}
         <div className="text-center">
           <button 
             type="button" 
@@ -167,31 +170,31 @@ export const LoginForm: React.FC = () => {
           </button>
         </div>
 
-        {/* Mensaje de error */}
+        {/* Mensaje de error del servidor */}
         {authError && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-lato">
             {authError}
           </div>
         )}
 
-        {/* Botón de submit - Lato */}
-<div className="flex justify-center pt-2">
-  <button
-    type="submit"
-    disabled={isSubmitting || !isFormValid}
-    className="rounded font-medium transition-colors font-lato flex items-center justify-center"
-    style={{
-      backgroundColor: isFormValid ? '#1E1B4D' : '#D2D1D4',
-      color: isFormValid ? '#FFFFFF' : '#A8A8A8',
-      cursor: isFormValid ? 'pointer' : 'not-allowed',
-      opacity: isSubmitting ? 0.7 : 1,
-      height: '36px',
-      width: '240px'
-    }}
-  >
-    {isSubmitting ? 'Ingresando...' : 'Ingresar'}
-  </button>
-  </div>
+        {/* Botón de submit */}
+        <div className="flex justify-center pt-2">
+          <button
+            type="submit"
+            disabled={isSubmitting || !isFormValid}
+            className="rounded font-medium transition-colors font-lato flex items-center justify-center"
+            style={{
+              backgroundColor: isFormValid ? '#1E1B4D' : '#D2D1D4',
+              color: isFormValid ? '#FFFFFF' : '#A8A8A8',
+              cursor: isFormValid ? 'pointer' : 'not-allowed',
+              opacity: isSubmitting ? 0.7 : 1,
+              height: '36px',
+              width: '240px'
+            }}
+          >
+            {isSubmitting ? 'Ingresando...' : 'Ingresar'}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -5,63 +5,65 @@ import type { LoginCredentials, LoginResponse } from '../types/auth.types';
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     try {
-      console.log('🔐 Intentando login con:', credentials.username);
-      
       const response = await authApi.post<any>(
         ENDPOINTS.LOGIN,
         credentials
       );
       
-      console.log('📥 Tipo de response.data:', typeof response.data);
-      console.log('📦 response.data:', response.data);
-      
       let token: string | null = null;
       
-      // Caso 1: El servidor devuelve el token como STRING directo
       if (typeof response.data === 'string') {
         token = response.data;
-        console.log('✅ Token es STRING directo');
-      }
-      // Caso 2: El servidor devuelve un objeto con token
-      else if (typeof response.data === 'object') {
+      } else if (typeof response.data === 'object') {
         token = 
           response.data.token || 
           response.data.accessToken || 
           response.data.access_token ||
           response.data.jwt ||
           response.data.authToken;
-        console.log('✅ Token extraído del objeto');
       }
-      
-      console.log('🔑 Token final:', token);
       
       if (token) {
         localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
-        console.log('💾 Token guardado en localStorage');
-        
-        // Verificar que se guardó
-        const savedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-        console.log('✔️ Token recuperado:', savedToken ? 'Sí' : 'No');
-        
-        // Devolver en formato esperado
         return { token } as LoginResponse;
       } else {
-        console.log('❌ NO se pudo extraer el token');
         throw new Error('No se recibió token del servidor');
       }
     } catch (error: any) {
-      console.log('❌ Error en login:', error.response?.data || error.message);
-      throw new Error(
-        error.response?.data?.message || 
-        error.message ||
-        'Error al iniciar sesión. Verifica tus credenciales.'
-      );
+      console.error('❌ Error en login:', error.response?.data || error.message);
+      
+      if (error.response) {
+        const status = error.response.status;
+        
+        if (status === 400 || status === 401) {
+          throw new Error('Usuario o contraseña incorrectos');
+        }
+        
+        if (status === 500) {
+          throw new Error('Error del servidor. Intenta de nuevo más tarde');
+        }
+        
+        if (status === 403) {
+          throw new Error('Acceso denegado. Verifica tus permisos');
+        }
+        
+        throw new Error('Error de autenticación. Intenta de nuevo');
+      }
+      
+      if (error.code === 'ECONNABORTED') {
+        throw new Error('Tiempo de espera agotado. Verifica tu conexión');
+      }
+      
+      if (error.message === 'Network Error') {
+        throw new Error('No se pudo conectar con el servidor');
+      }
+      
+      throw new Error('Error al iniciar sesión. Intenta de nuevo');
     }
   },
 
   logout: (): void => {
     localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    console.log('🚪 Sesión cerrada - Token eliminado');
   },
 
   getToken: (): string | null => {

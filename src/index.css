@@ -5,6 +5,7 @@
 @layer base {
   body {
     @apply bg-gray-50 font-sans antialiased;
+     font-family: 'Archivo', system-ui, sans-serif;
   }
 }
 

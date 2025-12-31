@@ -15,47 +15,30 @@ const createApiInstance = (baseURL: string): AxiosInstance => {
     (config: InternalAxiosRequestConfig) => {
       const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
       
-      // 👇 DEBUG LOGS
-      console.log('🔍 Interceptor Request:');
-     console.log('   URL:', `${config.baseURL || ''}${config.url || ''}`);
-
-      console.log('   Token en localStorage:', token ? '✅ Existe' : '❌ NO existe');
-      console.log('   Token:', token);
-      
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
-        console.log('   ✅ Header Authorization agregado');
-      } else {
-        console.log('   ❌ NO se agregó Authorization header');
       }
       
       return config;
     },
     (error) => {
-      console.log('❌ Error en request interceptor:', error);
+      console.error('❌ Error en request interceptor:', error);
       return Promise.reject(error);
     }
   );
 
   instance.interceptors.response.use(
-    (response) => {
-      console.log('✅ Response exitoso:', response.status, response.config.url);
-      return response;
-    },
+    (response) => response,
     (error) => {
-      console.log('❌ Error en response:');
-      console.log('   Status:', error.response?.status);
-      console.log('   URL:', error.config?.url);
-      console.log('   Message:', error.response?.data?.message || error.message);
+      console.error('❌ Error en response:', {
+        status: error.response?.status,
+        url: error.config?.url,
+        message: error.response?.data?.message || error.message
+      });
       
       if (error.response?.status === 401) {
-        console.log('🚪 Token inválido o expirado - Redirigiendo a login');
         localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
         window.location.href = '/login';
-      }
-      
-      if (error.response?.status === 403) {
-        console.log('🚫 Acceso denegado (403) - Verifica permisos del usuario');
       }
       
       return Promise.reject(error);

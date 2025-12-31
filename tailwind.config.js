@@ -7,9 +7,9 @@ export default {
   theme: {
     extend: {
        fontFamily: {
-       roboto: ['Roboto', 'sans-serif'],
-       lato: ['Lato', 'sans-serif'],
-        archivo: ['Archivo', 'sans-serif'],
+      // roboto: ['Roboto', 'sans-serif'],
+       //lato: ['Lato', 'sans-serif'],
+       sans: ['Archivo', 'system-ui', 'sans-serif'],
       },
       colors: {
         primary: {
