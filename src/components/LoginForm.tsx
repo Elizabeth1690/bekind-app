@@ -16,7 +16,7 @@ export const LoginForm: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, touchedFields },
+    formState: { errors, isSubmitting},
     watch,
   } = useForm<LoginCredentials>({
     mode: 'onBlur',
